@@ -4,6 +4,8 @@
 #include "GameState.h"
 #include "Player.h"
 
+#include <string>
+
 class Game {
 
 	// The players in the game
