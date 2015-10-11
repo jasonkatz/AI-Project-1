@@ -22,7 +22,7 @@ Game::Game(Player * p1, Player * p2, int limit) {
 void Game::PrintBoard() {
 	char normal[] = { 0x1b, '[', '0', ';', '3', '9', 'm', 0 };
 	char blue[] = { 0x1b, '[', '1', ';', '3', '4', 'm', 0 };
-	char pink[] = { 0x1b, '[', '1', ';', '3', '4', 'm', 0 };
+	char pink[] = { 0x1b, '[', '1', ';', '3', '5', 'm', 0 };
     vector<char *> colors;
     colors.push_back(&normal[0]);
     colors.push_back(&blue[0]);
