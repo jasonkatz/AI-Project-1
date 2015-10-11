@@ -4,8 +4,7 @@
 int Player::count = 0;
 
 Player::Player() {
-	id = count;
-	++count;
+	id = ++count;
 }
 
 int Player::GetId() {

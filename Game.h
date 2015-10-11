@@ -26,12 +26,15 @@ class Game {
 
 public:
 
+	// Flag for game over
+	bool isOver;
+
 	// Initializes a game with two given players and a time limit;
 	// Automatically assigns player1 to currentPlayer
 	Game(Player *, Player *, int);
 
-	// Returns a string representation of the board and can be printed on stdout
-	std::string GetBoard();
+	// Prints a representation of the board to stdout
+	void PrintBoard();
 
 	// Returns an array of legal moves given a current state and id of player making the move
 	static std::vector<Move> LegalMoves(GameState, int);
