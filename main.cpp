@@ -44,11 +44,15 @@ int main() {
 	// Initialize game
 	Game game(p1, p2, timeLimit);
 
+	game = Game::FromFile("Testfile");
+
 	/*
 	 * Game loop
 	 */
 	do {
 		game.PrintBoard();
+
+		vector<Location> moves = Game::LegalMoves(game.GetCurrentState(), game.GetCurrentPlayer()->GetId());
 
 		string f;
 		cin >> f;

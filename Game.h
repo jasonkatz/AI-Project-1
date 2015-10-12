@@ -24,6 +24,9 @@ class Game {
 	// The time limit, in seconds, that a computer player has to make a move
 	int timeLimit;
 
+	// Finds all empty locations that are adjacent to provided location
+	static std::vector<Location> getEmptyAdjacentLocations(GameState, Location);
+
 public:
 
 	// Flag for game over
@@ -36,11 +39,15 @@ public:
 	// Initializes a game with two players, a time limit, a current state, and current player id;
 	Game(Player *, Player *, int, GameState, int);
 
+	// Getters
+	GameState GetCurrentState() { return currentState; }
+	Player * GetCurrentPlayer() { return currentPlayer; }
+
 	// Prints a representation of the board to stdout
 	void PrintBoard();
 
 	// Returns an array of legal moves given a current state and id of player making the move
-	static std::vector<Move> LegalMoves(GameState, int);
+	static std::vector<Location> LegalMoves(GameState, int);
 
 	// Returns Game object loaded from file
 	static Game FromFile(std::string);
