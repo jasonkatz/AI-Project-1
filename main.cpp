@@ -9,7 +9,7 @@ int main() {
 	/*
 	 * Get initial data
 	 */
-
+	
 	// Time limit
 	int timeLimit;
 	cout << "Specify a time limit (in seconds): ";

@@ -33,11 +33,17 @@ public:
 	// Automatically assigns player1 to currentPlayer
 	Game(Player *, Player *, int);
 
+	// Initializes a game with two players, a time limit, a current state, and current player id;
+	Game(Player *, Player *, int, GameState, int);
+
 	// Prints a representation of the board to stdout
 	void PrintBoard();
 
 	// Returns an array of legal moves given a current state and id of player making the move
 	static std::vector<Move> LegalMoves(GameState, int);
+
+	// Returns Game object loaded from file
+	static Game FromFile(std::string);
 
 };
 
