@@ -14,6 +14,7 @@ using std::string;
 
 Game::Game(Player * p1, Player * p2, int limit) {
 	isOver = false;
+	lastSkipped = false;
 
 	player1 = p1;
 	player2 = p2;
@@ -25,6 +26,7 @@ Game::Game(Player * p1, Player * p2, int limit) {
 
 Game::Game(Player * p1, Player * p2, int limit, GameState state, int currentId) {
 	isOver = false;
+	lastSkipped = false;
 
 	player1 = p1;
 	player2 = p2;
@@ -116,6 +118,21 @@ void Game::Move() {
 		enemyPlayer = player1;
 	}
 	cout << " to move:" << endl;
+
+	// If no legal moves, output notice and return
+	if (LegalMoves(currentState, currentPlayer->GetId()).size() == 0) {
+		// Check for game end
+		if (lastSkipped) {
+			isOver = true;
+		} else {
+			cout << "No legal moves available; skipping turn" << endl;
+			lastSkipped = true;
+		}
+		return;
+	}
+
+	// Reset last skipped flag
+	lastSkipped = false;
 
 	vector<vector<int>> board = currentState.GetBoard();
 
@@ -301,13 +318,31 @@ void Game::Move() {
 
 	}
 
+	// Update state
 	currentState = GameState::ApplyMove(currentState, changedPieces, currentPlayer->GetId());
 
-	if (currentPlayer->GetId() == player1->GetId()) {
-		currentPlayer = player2;
-	} else if (currentPlayer->GetId() == player2->GetId()) {
-		currentPlayer = player1;
+	// Switch player
+	currentPlayer = enemyPlayer;
+}
+
+void Game::PrintResults() {
+	// Compile statistics
+	int player1Count = 0, player2Count = 0;
+	vector<vector<int>> board = currentState.GetBoard();
+	for (int i = 0; i < 8; ++i) {
+		for (int j = 0; j < 8; ++j) {
+			if (board[i][j] == player1->GetId()) {
+				++player1Count;
+			} else if (board[i][j] == player2->GetId()) {
+				++player2Count;
+			}
+		}
 	}
+	
+	// Display results
+	cout << "Game over!" << endl;
+	cout << "Player " << (player1Count > player2Count ? "1" : "2") << " wins!" << endl;
+	cout << player1Count << " - " << player2Count << endl;
 }
 
 std::vector<Location> Game::LegalMoves(GameState state, int id) {
@@ -425,9 +460,9 @@ std::vector<Location> Game::LegalMoves(GameState state, int id) {
 					++tmp2;
 				}
 			} else if (emptyAdjacent[j].extras == "UP") {
-				// Empty on down, check squares to the up
-				int tmp = enemyLocations[i].row - 1;
-				while (tmp >= 0) {
+				// Empty on up, check squares to the down
+				int tmp = enemyLocations[i].row + 1;
+				while (tmp < 8) {
 					if (board[tmp][emptyAdjacent[j].column] == 0) {
 						break;
 					}
@@ -435,7 +470,7 @@ std::vector<Location> Game::LegalMoves(GameState state, int id) {
 						validLocations.push_back(emptyAdjacent[j]);
 						break;
 					}
-					--tmp;
+					++tmp;
 				}
 			} else if (emptyAdjacent[j].extras == "UPRIGHT") {
 				// Empty on up right, check squares to the down left
@@ -452,10 +487,10 @@ std::vector<Location> Game::LegalMoves(GameState state, int id) {
 					--tmp2;
 				}
 			}
-			
+
 		}
 	}
-	
+
 	return validLocations;
 }
 

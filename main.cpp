@@ -1,4 +1,6 @@
 #include <iostream>
+#include <limits>
+
 #include "Game.h"
 #include "Player.h"
 
@@ -13,7 +15,12 @@ int main() {
 	// Time limit
 	int timeLimit;
 	cout << "Specify a time limit (in seconds): ";
-	cin >> timeLimit;
+	while (!(std::cin >> timeLimit)) {
+		// Ensure integral input
+		std::cin.clear();
+		std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+		continue;
+	}
 
 	// Player 1 type (use string var and check first character so we don't overflow into the next input
 	Player * p1;
@@ -44,7 +51,7 @@ int main() {
 	// Initialize game
 	Game game(p1, p2, timeLimit);
 
-	game = Game::FromFile("Testfile");
+	game = Game::FromFile("Testfile3.txt");
 
 	/*
 	 * Game loop
@@ -52,8 +59,9 @@ int main() {
 	do {
 		game.PrintBoard();
 		game.Move();
-		//vector<Location> moves = Game::LegalMoves(game.GetCurrentState(), game.GetCurrentPlayer()->GetId());
 	} while (!game.isOver);
+
+	game.PrintResults();
 
 	system("pause");
 	return 0;

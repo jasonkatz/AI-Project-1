@@ -58,7 +58,7 @@ Location HumanPlayer::MakeMove(GameState state) {
 		// Check if move is legal
 		isLegal = std::find(legalMoves.begin(), legalMoves.end(), *pDesiredMove) != legalMoves.end();
 		if (!isLegal) {
-			std::cout << "Please enter a legal move!" << std::endl;
+			std::cout << "Enter a legal move!" << std::endl;
 		}
 	} while (!isLegal);
 

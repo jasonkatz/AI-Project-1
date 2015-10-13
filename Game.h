@@ -24,6 +24,9 @@ class Game {
 	// The time limit, in seconds, that a computer player has to make a move
 	int timeLimit;
 
+	// Keeps track of states where the previous turn was skipped due to a lack of turns
+	bool lastSkipped;
+
 	// Finds all locations that are adjacent to provided location with given id (defaults to 0/empty)
 	static std::vector<Location> getAdjacentLocations(GameState, Location, int id = 0);
 
@@ -46,7 +49,11 @@ public:
 	// Prints a representation of the board to stdout
 	void PrintBoard();
 
+	// Move function that executes a move based on the player
 	void Move();
+
+	// Prints results of the game (who won, score, etc)
+	void PrintResults();
 
 	// Returns an array of legal moves given a current state and id of player making the move
 	static std::vector<Location> LegalMoves(GameState, int);
