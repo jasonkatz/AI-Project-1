@@ -1,5 +1,6 @@
 #include <iostream>
 #include <limits>
+#include <ctime>
 
 #include "Player.h"
 #include "Game.h"
@@ -16,7 +17,16 @@ int Player::GetId() {
 
 Location ComputerPlayer::MakeMove(GameState state) {
 	// TODO: AI stuff
-	return Location(1, 1);
+
+	// 2 second delay
+	clock_t t = std::clock() + 2 * (double) CLOCKS_PER_SEC;
+	while (std::clock() < t) {
+		continue;
+	}
+	// Temporarily select a random legal move and return it
+	std::vector<Location> legalMoves = Game::LegalMoves(state, id);
+	srand((long) time(NULL));
+	return legalMoves[rand() % legalMoves.size()];
 }
 
 Location HumanPlayer::MakeMove(GameState state) {

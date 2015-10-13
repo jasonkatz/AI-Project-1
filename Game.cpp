@@ -521,7 +521,7 @@ Game Game::FromFile(string fileName) {
 	int time;
 	iss2 >> time;
 
-	return Game(new HumanPlayer(), new HumanPlayer(), time, GameState(b), currentPlayerId);
+	return Game(new ComputerPlayer(), new ComputerPlayer(), time, GameState(b), currentPlayerId);
 }
 
 vector<Location> Game::getAdjacentLocations(GameState state, Location l, int id) {
