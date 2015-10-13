@@ -105,6 +105,211 @@ void Game::PrintBoard() {
 	}
 }
 
+void Game::Move() {
+	Player * enemyPlayer = new HumanPlayer();
+	cout << "Player ";
+	if (currentPlayer->GetId() == player1->GetId()) {
+		cout << "1";
+		enemyPlayer = player2;
+	} else if (currentPlayer->GetId() == player2->GetId()) {
+		cout << "2";
+		enemyPlayer = player1;
+	}
+	cout << " to move:" << endl;
+
+	vector<vector<int>> board = currentState.GetBoard();
+
+	// Get move from player; legality is checked here, so we will always get a legal move
+	Location move = currentPlayer->MakeMove(currentState);
+
+	// Compile a vector of all converted pieces
+	vector<Location> changedPieces;
+	changedPieces.push_back(move);
+
+	// Check each direction for flanked enemies and add each one to changePieces
+
+	vector<Location> adjacentEnemies = getAdjacentLocations(currentState, move, enemyPlayer->GetId());
+	for (unsigned int i = 0; i < adjacentEnemies.size(); ++i) {
+		// We can include duplicates here since checking for them is simply less efficient than processing them twice (without repercussions)
+
+		// Check direction of adjacent square
+		if (adjacentEnemies[i].extras == "RIGHT") {
+			// Create temporary vector to keep track of valid pieces
+			vector<Location> tmpLocs;
+			tmpLocs.push_back(adjacentEnemies[i]);
+
+			// Enemy on the right, keep checking right
+			int tmp = adjacentEnemies[i].column + 1;
+			while (tmp < 8) {
+				if (board[move.row][tmp] == 0) {
+					break;
+				} else if (board[move.row][tmp] == enemyPlayer->GetId()) {
+					tmpLocs.push_back(Location(move.row, tmp));
+				} else if (board[move.row][tmp] == currentPlayer->GetId()) {
+					for (unsigned int j = 0; j < tmpLocs.size(); ++j) {
+						changedPieces.push_back(tmpLocs[j]);
+					}
+					break;
+				}
+				++tmp;
+			}
+		} else if (adjacentEnemies[i].extras == "DOWNRIGHT") {
+			// Create temporary vector to keep track of valid pieces
+			vector<Location> tmpLocs;
+			tmpLocs.push_back(adjacentEnemies[i]);
+
+			// Empty on down right, keep checking down right
+			int tmp1 = adjacentEnemies[i].row + 1, tmp2 = adjacentEnemies[i].column + 1;
+			while (tmp1 < 8 && tmp2 < 8) {
+				if (board[tmp1][tmp2] == 0) {
+					break;
+				} else if (board[tmp1][tmp2] == enemyPlayer->GetId()) {
+					tmpLocs.push_back(Location(tmp1, tmp2));
+				} else if (board[tmp1][tmp2] == currentPlayer->GetId()) {
+					for (unsigned int j = 0; j < tmpLocs.size(); ++j) {
+						changedPieces.push_back(tmpLocs[j]);
+					}
+					break;
+				}
+				++tmp1;
+				++tmp2;
+			}
+		} else if (adjacentEnemies[i].extras == "DOWN") {
+			// Create temporary vector to keep track of valid pieces
+			vector<Location> tmpLocs;
+			tmpLocs.push_back(adjacentEnemies[i]);
+
+			// Enemy on the down, keep checking down
+			int tmp = adjacentEnemies[i].row + 1;
+			while (tmp < 8) {
+				if (board[tmp][move.column] == 0) {
+					break;
+				} else if (board[tmp][move.column] == enemyPlayer->GetId()) {
+					tmpLocs.push_back(Location(tmp, move.column));
+				} else if (board[tmp][move.column] == currentPlayer->GetId()) {
+					for (unsigned int j = 0; j < tmpLocs.size(); ++j) {
+						changedPieces.push_back(tmpLocs[j]);
+					}
+					break;
+				}
+				++tmp;
+			}
+		} else if (adjacentEnemies[i].extras == "DOWNLEFT") {
+			// Create temporary vector to keep track of valid pieces
+			vector<Location> tmpLocs;
+			tmpLocs.push_back(adjacentEnemies[i]);
+
+			// Empty on down left, keep checking down left
+			int tmp1 = adjacentEnemies[i].row + 1, tmp2 = adjacentEnemies[i].column - 1;
+			while (tmp1 < 8 && tmp2 >= 0) {
+				if (board[tmp1][tmp2] == 0) {
+					break;
+				} else if (board[tmp1][tmp2] == enemyPlayer->GetId()) {
+					tmpLocs.push_back(Location(tmp1, tmp2));
+				} else if (board[tmp1][tmp2] == currentPlayer->GetId()) {
+					for (unsigned int j = 0; j < tmpLocs.size(); ++j) {
+						changedPieces.push_back(tmpLocs[j]);
+					}
+					break;
+				}
+				++tmp1;
+				--tmp2;
+			}
+		} else if (adjacentEnemies[i].extras == "LEFT") {
+			// Create temporary vector to keep track of valid pieces
+			vector<Location> tmpLocs;
+			tmpLocs.push_back(adjacentEnemies[i]);
+
+			// Enemy on the left, keep checking left
+			int tmp = adjacentEnemies[i].column - 1;
+			while (tmp >= 0) {
+				if (board[move.row][tmp] == 0) {
+					break;
+				} else if (board[move.row][tmp] == enemyPlayer->GetId()) {
+					tmpLocs.push_back(Location(move.row, tmp));
+				} else if (board[move.row][tmp] == currentPlayer->GetId()) {
+					for (unsigned int j = 0; j < tmpLocs.size(); ++j) {
+						changedPieces.push_back(tmpLocs[j]);
+					}
+					break;
+				}
+				--tmp;
+			}
+		} else if (adjacentEnemies[i].extras == "UPLEFT") {
+			// Create temporary vector to keep track of valid pieces
+			vector<Location> tmpLocs;
+			tmpLocs.push_back(adjacentEnemies[i]);
+
+			// Empty on up left, keep checking up left
+			int tmp1 = adjacentEnemies[i].row - 1, tmp2 = adjacentEnemies[i].column - 1;
+			while (tmp1 >= 0 && tmp2 >= 0) {
+				if (board[tmp1][tmp2] == 0) {
+					break;
+				} else if (board[tmp1][tmp2] == enemyPlayer->GetId()) {
+					tmpLocs.push_back(Location(tmp1, tmp2));
+				} else if (board[tmp1][tmp2] == currentPlayer->GetId()) {
+					for (unsigned int j = 0; j < tmpLocs.size(); ++j) {
+						changedPieces.push_back(tmpLocs[j]);
+					}
+					break;
+				}
+				--tmp1;
+				--tmp2;
+			}
+		} else if (adjacentEnemies[i].extras == "UP") {
+			// Create temporary vector to keep track of valid pieces
+			vector<Location> tmpLocs;
+			tmpLocs.push_back(adjacentEnemies[i]);
+
+			// Enemy on the down, keep checking down
+			int tmp = adjacentEnemies[i].row - 1;
+			while (tmp >= 0) {
+				if (board[tmp][move.column] == 0) {
+					break;
+				} else if (board[tmp][move.column] == enemyPlayer->GetId()) {
+					tmpLocs.push_back(Location(tmp, move.column));
+				} else if (board[tmp][move.column] == currentPlayer->GetId()) {
+					for (unsigned int j = 0; j < tmpLocs.size(); ++j) {
+						changedPieces.push_back(tmpLocs[j]);
+					}
+					break;
+				}
+				--tmp;
+			}
+		} else if (adjacentEnemies[i].extras == "UPRIGHT") {
+			// Create temporary vector to keep track of valid pieces
+			vector<Location> tmpLocs;
+			tmpLocs.push_back(adjacentEnemies[i]);
+
+			// Empty on up right, keep checking up right
+			int tmp1 = adjacentEnemies[i].row - 1, tmp2 = adjacentEnemies[i].column + 1;
+			while (tmp1 >= 0 && tmp2 < 8) {
+				if (board[tmp1][tmp2] == 0) {
+					break;
+				} else if (board[tmp1][tmp2] == enemyPlayer->GetId()) {
+					tmpLocs.push_back(Location(tmp1, tmp2));
+				} else if (board[tmp1][tmp2] == currentPlayer->GetId()) {
+					for (unsigned int j = 0; j < tmpLocs.size(); ++j) {
+						changedPieces.push_back(tmpLocs[j]);
+					}
+					break;
+				}
+				--tmp1;
+				++tmp2;
+			}
+		}
+
+	}
+
+	currentState = GameState::ApplyMove(currentState, changedPieces, currentPlayer->GetId());
+
+	if (currentPlayer->GetId() == player1->GetId()) {
+		currentPlayer = player2;
+	} else if (currentPlayer->GetId() == player2->GetId()) {
+		currentPlayer = player1;
+	}
+}
+
 std::vector<Location> Game::LegalMoves(GameState state, int id) {
 	vector<vector<int>> board = state.GetBoard();
 
@@ -129,7 +334,7 @@ std::vector<Location> Game::LegalMoves(GameState state, int id) {
 	//	       Check if that square is flanked by another friendly piece incident upon the current enemy piece
 	for (unsigned int i = 0; i < enemyLocations.size(); ++i) {
 		// Get adjacent locations
-		vector<Location> emptyAdjacent = getEmptyAdjacentLocations(state, enemyLocations[i]);
+		vector<Location> emptyAdjacent = getAdjacentLocations(state, enemyLocations[i], 0);
 
 		for (unsigned int j = 0; j < emptyAdjacent.size(); ++j) {
 			// Don't check location if previously verified as valid
@@ -137,138 +342,117 @@ std::vector<Location> Game::LegalMoves(GameState state, int id) {
 				continue;
 			}
 
-			// Check rows
-			if (emptyAdjacent[j].row == enemyLocations[i].row) {
-				// Check left
-				if (emptyAdjacent[j].column > enemyLocations[i].column) {
-					int tmp = enemyLocations[i].column - 1;
-					while (tmp >= 0) {
-						if (board[emptyAdjacent[j].row][tmp] == 0) {
-							break;
-						}
-						if (board[emptyAdjacent[j].row][tmp] == id) {
-							validLocations.push_back(emptyAdjacent[j]);
-							break;
-						}
-						--tmp;
+			// Check direction of adjacent square
+			if (emptyAdjacent[j].extras == "RIGHT") {
+				// Empty on right, check squares to the left
+				int tmp = enemyLocations[i].column - 1;
+				while (tmp >= 0) {
+					if (board[emptyAdjacent[j].row][tmp] == 0) {
+						break;
 					}
+					if (board[emptyAdjacent[j].row][tmp] == id) {
+						validLocations.push_back(emptyAdjacent[j]);
+						break;
+					}
+					--tmp;
 				}
-
-				// Check right
-				if (emptyAdjacent[j].column < enemyLocations[i].column) {
-					int tmp = enemyLocations[i].column + 1;
-					while (tmp < 8) {
-						if (board[emptyAdjacent[j].row][tmp] == 0) {
-							break;
-						}
-						if (board[emptyAdjacent[j].row][tmp] == id) {
-							validLocations.push_back(emptyAdjacent[j]);
-							break;
-						}
-						++tmp;
+			} else if (emptyAdjacent[j].extras == "DOWNRIGHT") {
+				// Empty on down right, check squares to the up left
+				int tmp1 = enemyLocations[i].row - 1, tmp2 = enemyLocations[i].column - 1;
+				while (tmp1 >= 0 && tmp2 >= 0) {
+					if (board[tmp1][tmp2] == 0) {
+						break;
 					}
+					if (board[tmp1][tmp2] == id) {
+						validLocations.push_back(emptyAdjacent[j]);
+						break;
+					}
+					--tmp1;
+					--tmp2;
 				}
-			}
-
-			// Check columns
-			if (emptyAdjacent[j].column == enemyLocations[i].column) {
-				// Check up
-				if (emptyAdjacent[j].row > enemyLocations[i].row) {
-					int tmp = enemyLocations[i].row - 1;
-					while (tmp >= 0) {
-						if (board[tmp][emptyAdjacent[j].column] == 0) {
-							break;
-						}
-						if (board[tmp][emptyAdjacent[j].column] == id) {
-							validLocations.push_back(emptyAdjacent[j]);
-							break;
-						}
-						--tmp;
+			} else if (emptyAdjacent[j].extras == "DOWN") {
+				// Empty on down, check squares to the up
+				int tmp = enemyLocations[i].row - 1;
+				while (tmp >= 0) {
+					if (board[tmp][emptyAdjacent[j].column] == 0) {
+						break;
 					}
+					if (board[tmp][emptyAdjacent[j].column] == id) {
+						validLocations.push_back(emptyAdjacent[j]);
+						break;
+					}
+					--tmp;
 				}
-
-				// Check down
-				if (emptyAdjacent[j].row < enemyLocations[i].row) {
-					int tmp = enemyLocations[i].row + 1;
-					while (tmp < 8) {
-						if (board[tmp][emptyAdjacent[j].column] == 0) {
-							break;
-						}
-						if (board[tmp][emptyAdjacent[j].column] == id) {
-							validLocations.push_back(emptyAdjacent[j]);
-							break;
-						}
-						++tmp;
+			} else if (emptyAdjacent[j].extras == "DOWNLEFT") {
+				// Empty on down left, check squares to the up right
+				int tmp1 = enemyLocations[i].row - 1, tmp2 = enemyLocations[i].column + 1;
+				while (tmp1 >= 0 && tmp2 < 8) {
+					if (board[tmp1][tmp2] == 0) {
+						break;
 					}
+					if (board[tmp1][tmp2] == id) {
+						validLocations.push_back(emptyAdjacent[j]);
+						break;
+					}
+					--tmp1;
+					++tmp2;
 				}
-			}
-
-			// Check diagonals
-			if (emptyAdjacent[j].column != enemyLocations[i].column && emptyAdjacent[j].row != enemyLocations[i].row) {
-				// Check up left
-				if (emptyAdjacent[j].row > enemyLocations[i].row && emptyAdjacent[j].column > enemyLocations[i].column) {
-					int tmp1 = enemyLocations[i].row  - 1, tmp2 = enemyLocations[i].column - 1;
-					while (tmp1 >= 0 && tmp2 >= 0) {
-						if (board[tmp1][tmp2] == 0) {
-							break;
-						}
-						if (board[tmp1][tmp2] == id) {
-							validLocations.push_back(emptyAdjacent[j]);
-							break;
-						}
-						--tmp1;
-						--tmp2;
+			} else if (emptyAdjacent[j].extras == "LEFT") {
+				// Empty on left, check squares to the right
+				int tmp = enemyLocations[i].column + 1;
+				while (tmp < 8) {
+					if (board[emptyAdjacent[j].row][tmp] == 0) {
+						break;
 					}
+					if (board[emptyAdjacent[j].row][tmp] == id) {
+						validLocations.push_back(emptyAdjacent[j]);
+						break;
+					}
+					++tmp;
 				}
-
-				// Check up right
-				if (emptyAdjacent[j].row > enemyLocations[i].row && emptyAdjacent[j].column < enemyLocations[i].column) {
-					int tmp1 = enemyLocations[i].row - 1, tmp2 = enemyLocations[i].column + 1;
-					while (tmp1 >= 0 && tmp2 < 8) {
-						if (board[tmp1][tmp2] == 0) {
-							break;
-						}
-						if (board[tmp1][tmp2] == id) {
-							validLocations.push_back(emptyAdjacent[j]);
-							break;
-						}
-						--tmp1;
-						++tmp2;
+			} else if (emptyAdjacent[j].extras == "UPLEFT") {
+				// Empty on up left, check squares to the down right
+				int tmp1 = enemyLocations[i].row + 1, tmp2 = enemyLocations[i].column + 1;
+				while (tmp1 < 8 && tmp2 < 8) {
+					if (board[tmp1][tmp2] == 0) {
+						break;
 					}
+					if (board[tmp1][tmp2] == id) {
+						validLocations.push_back(emptyAdjacent[j]);
+						break;
+					}
+					++tmp1;
+					++tmp2;
 				}
-
-				// Check down left
-				if (emptyAdjacent[j].row < enemyLocations[i].row && emptyAdjacent[j].column > enemyLocations[i].column) {
-					int tmp1 = enemyLocations[i].row + 1, tmp2 = enemyLocations[i].column - 1;
-					while (tmp1 < 8 && tmp2 >= 0) {
-						if (board[tmp1][tmp2] == 0) {
-							break;
-						}
-						if (board[tmp1][tmp2] == id) {
-							validLocations.push_back(emptyAdjacent[j]);
-							break;
-						}
-						++tmp1;
-						--tmp2;
+			} else if (emptyAdjacent[j].extras == "UP") {
+				// Empty on down, check squares to the up
+				int tmp = enemyLocations[i].row - 1;
+				while (tmp >= 0) {
+					if (board[tmp][emptyAdjacent[j].column] == 0) {
+						break;
 					}
+					if (board[tmp][emptyAdjacent[j].column] == id) {
+						validLocations.push_back(emptyAdjacent[j]);
+						break;
+					}
+					--tmp;
 				}
-
-				// Check down right
-				if (emptyAdjacent[j].row < enemyLocations[i].row && emptyAdjacent[j].column < enemyLocations[i].column) {
-					int tmp1 = enemyLocations[i].row + 1, tmp2 = enemyLocations[i].column + 1;
-					while (tmp1 < 8 && tmp2 < 8) {
-						if (board[tmp1][tmp2] == 0) {
-							break;
-						}
-						if (board[tmp1][tmp2] == id) {
-							validLocations.push_back(emptyAdjacent[j]);
-							break;
-						}
-						++tmp1;
-						++tmp2;
+			} else if (emptyAdjacent[j].extras == "UPRIGHT") {
+				// Empty on up right, check squares to the down left
+				int tmp1 = enemyLocations[i].row + 1, tmp2 = enemyLocations[i].column - 1;
+				while (tmp1 < 8 && tmp2 >= 0) {
+					if (board[tmp1][tmp2] == 0) {
+						break;
 					}
+					if (board[tmp1][tmp2] == id) {
+						validLocations.push_back(emptyAdjacent[j]);
+						break;
+					}
+					++tmp1;
+					--tmp2;
 				}
 			}
+			
 		}
 	}
 	
@@ -305,52 +489,52 @@ Game Game::FromFile(string fileName) {
 	return Game(new HumanPlayer(), new HumanPlayer(), time, GameState(b), currentPlayerId);
 }
 
-vector<Location> Game::getEmptyAdjacentLocations(GameState state, Location l) {
+vector<Location> Game::getAdjacentLocations(GameState state, Location l, int id) {
 	vector<vector<int>> board = state.GetBoard();
 	vector<Location> adjacent;
 
 	if (l.row > 0) {
-		if (!board[l.row - 1][l.column]) {
-			adjacent.push_back(Location(l.row - 1, l.column));
+		if (board[l.row - 1][l.column] == id) {
+			adjacent.push_back(Location(l.row - 1, l.column, "UP"));
 		}
 		
 		if (l.column > 0) {
-			if (!board[l.row - 1][l.column - 1]) {
-				adjacent.push_back(Location(l.row - 1, l.column - 1));
+			if (board[l.row - 1][l.column - 1] == id) {
+				adjacent.push_back(Location(l.row - 1, l.column - 1, "UPLEFT"));
 			}
 		}
 		if (l.column < 7) {
-			if (!board[l.row - 1][l.column + 1]) {
-				adjacent.push_back(Location(l.row - 1, l.column + 1));
+			if (board[l.row - 1][l.column + 1] == id) {
+				adjacent.push_back(Location(l.row - 1, l.column + 1, "UPRIGHT"));
 			}
 		}
 	}
 
 	if (l.row < 7) {
-		if (!board[l.row + 1][l.column]) {
-			adjacent.push_back(Location(l.row + 1, l.column));
+		if (board[l.row + 1][l.column] == id) {
+			adjacent.push_back(Location(l.row + 1, l.column, "DOWN"));
 		}
 
 		if (l.column > 0) {
-			if (!board[l.row + 1][l.column - 1]) {
-				adjacent.push_back(Location(l.row + 1, l.column - 1));
+			if (board[l.row + 1][l.column - 1] == id) {
+				adjacent.push_back(Location(l.row + 1, l.column - 1, "DOWNLEFT"));
 			}
 		}
 		if (l.column < 7) {
-			if (!board[l.row + 1][l.column + 1]) {
-				adjacent.push_back(Location(l.row + 1, l.column + 1));
+			if (board[l.row + 1][l.column + 1] == id) {
+				adjacent.push_back(Location(l.row + 1, l.column + 1, "DOWNRIGHT"));
 			}
 		}
 	}
 
 	if (l.column > 0) {
-		if (!board[l.row][l.column - 1]) {
-			adjacent.push_back(Location(l.row, l.column - 1));
+		if (board[l.row][l.column - 1] == id) {
+			adjacent.push_back(Location(l.row, l.column - 1, "LEFT"));
 		}
 	}
 	if (l.column < 7) {
-		if (!board[l.row][l.column + 1]) {
-			adjacent.push_back(Location(l.row, l.column + 1));
+		if (board[l.row][l.column + 1] == id) {
+			adjacent.push_back(Location(l.row, l.column + 1, "RIGHT"));
 		}
 	}
 

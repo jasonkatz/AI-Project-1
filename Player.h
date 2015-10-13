@@ -1,7 +1,7 @@
 #ifndef PLAYER_H
 #define PLAYER_H
 
-#include "GameState.h"
+#include "Utils.h"
 
 class Player {
 

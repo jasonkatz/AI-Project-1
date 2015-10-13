@@ -1,7 +1,7 @@
 #ifndef GAME_H
 #define GAME_H
 
-#include "GameState.h"
+#include "Utils.h"
 #include "Player.h"
 
 #include <string>
@@ -24,8 +24,8 @@ class Game {
 	// The time limit, in seconds, that a computer player has to make a move
 	int timeLimit;
 
-	// Finds all empty locations that are adjacent to provided location
-	static std::vector<Location> getEmptyAdjacentLocations(GameState, Location);
+	// Finds all locations that are adjacent to provided location with given id (defaults to 0/empty)
+	static std::vector<Location> getAdjacentLocations(GameState, Location, int id = 0);
 
 public:
 
@@ -45,6 +45,8 @@ public:
 
 	// Prints a representation of the board to stdout
 	void PrintBoard();
+
+	void Move();
 
 	// Returns an array of legal moves given a current state and id of player making the move
 	static std::vector<Location> LegalMoves(GameState, int);
