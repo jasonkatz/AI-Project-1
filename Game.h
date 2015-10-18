@@ -30,6 +30,12 @@ class Game {
 	// Finds all locations that are adjacent to provided location with given id (defaults to 0/empty)
 	static std::vector<Location> getAdjacentLocations(GameState, Location, int id = 0);
 
+	// Heuristic function that returns a value for a specific state and player id
+	static double heuristic(GameState, int, int);
+
+	// Returns all children of a certain state given player ids
+	static std::vector<GameState> getChildren(GameState, int, int);
+
 public:
 
 	// Flag for game over
@@ -60,6 +66,13 @@ public:
 
 	// Returns Game object loaded from file
 	static Game FromFile(std::string);
+
+	// Searches the game tree for the best move
+	// and selects a move after provided time limit or entire tree searched
+	static double MinimaxSearch(GameState, int, int, int, int);
+
+	// Finds all locations that would be changed by a given move from a state
+	static std::vector<Location> GetChangedPieces(GameState, Location, int, int);
 
 };
 

@@ -4,6 +4,7 @@
 #include <fstream>
 #include <sstream>
 #include <algorithm>
+#include <climits>
 
 #include "Game.h"
 
@@ -134,10 +135,22 @@ void Game::Move() {
 	// Reset last skipped flag
 	lastSkipped = false;
 
-	vector<vector<int>> board = currentState.GetBoard();
 
 	// Get move from player; legality is checked here, so we will always get a legal move
 	Location move = currentPlayer->MakeMove(currentState);
+
+	// Get changed pieces
+	vector<Location> changedPieces = GetChangedPieces(currentState, move, currentPlayer->GetId(), enemyPlayer->GetId());
+
+	// Update state
+	currentState = GameState::ApplyMove(currentState, changedPieces, currentPlayer->GetId());
+
+	// Switch player
+	currentPlayer = enemyPlayer;
+}
+
+vector<Location> Game::GetChangedPieces(GameState state, Location move, int currentId, int enemyId) {
+	vector<vector<int>> board = state.GetBoard();
 
 	// Compile a vector of all converted pieces
 	vector<Location> changedPieces;
@@ -145,7 +158,7 @@ void Game::Move() {
 
 	// Check each direction for flanked enemies and add each one to changePieces
 
-	vector<Location> adjacentEnemies = getAdjacentLocations(currentState, move, enemyPlayer->GetId());
+	vector<Location> adjacentEnemies = getAdjacentLocations(state, move, enemyId);
 	for (unsigned int i = 0; i < adjacentEnemies.size(); ++i) {
 		// We can include duplicates here since checking for them is simply less efficient than processing them twice (without repercussions)
 
@@ -160,9 +173,9 @@ void Game::Move() {
 			while (tmp < 8) {
 				if (board[move.row][tmp] == 0) {
 					break;
-				} else if (board[move.row][tmp] == enemyPlayer->GetId()) {
+				} else if (board[move.row][tmp] == enemyId) {
 					tmpLocs.push_back(Location(move.row, tmp));
-				} else if (board[move.row][tmp] == currentPlayer->GetId()) {
+				} else if (board[move.row][tmp] == currentId) {
 					for (unsigned int j = 0; j < tmpLocs.size(); ++j) {
 						changedPieces.push_back(tmpLocs[j]);
 					}
@@ -180,9 +193,9 @@ void Game::Move() {
 			while (tmp1 < 8 && tmp2 < 8) {
 				if (board[tmp1][tmp2] == 0) {
 					break;
-				} else if (board[tmp1][tmp2] == enemyPlayer->GetId()) {
+				} else if (board[tmp1][tmp2] == enemyId) {
 					tmpLocs.push_back(Location(tmp1, tmp2));
-				} else if (board[tmp1][tmp2] == currentPlayer->GetId()) {
+				} else if (board[tmp1][tmp2] == currentId) {
 					for (unsigned int j = 0; j < tmpLocs.size(); ++j) {
 						changedPieces.push_back(tmpLocs[j]);
 					}
@@ -201,9 +214,9 @@ void Game::Move() {
 			while (tmp < 8) {
 				if (board[tmp][move.column] == 0) {
 					break;
-				} else if (board[tmp][move.column] == enemyPlayer->GetId()) {
+				} else if (board[tmp][move.column] == enemyId) {
 					tmpLocs.push_back(Location(tmp, move.column));
-				} else if (board[tmp][move.column] == currentPlayer->GetId()) {
+				} else if (board[tmp][move.column] == currentId) {
 					for (unsigned int j = 0; j < tmpLocs.size(); ++j) {
 						changedPieces.push_back(tmpLocs[j]);
 					}
@@ -221,9 +234,9 @@ void Game::Move() {
 			while (tmp1 < 8 && tmp2 >= 0) {
 				if (board[tmp1][tmp2] == 0) {
 					break;
-				} else if (board[tmp1][tmp2] == enemyPlayer->GetId()) {
+				} else if (board[tmp1][tmp2] == enemyId) {
 					tmpLocs.push_back(Location(tmp1, tmp2));
-				} else if (board[tmp1][tmp2] == currentPlayer->GetId()) {
+				} else if (board[tmp1][tmp2] == currentId) {
 					for (unsigned int j = 0; j < tmpLocs.size(); ++j) {
 						changedPieces.push_back(tmpLocs[j]);
 					}
@@ -242,9 +255,9 @@ void Game::Move() {
 			while (tmp >= 0) {
 				if (board[move.row][tmp] == 0) {
 					break;
-				} else if (board[move.row][tmp] == enemyPlayer->GetId()) {
+				} else if (board[move.row][tmp] == enemyId) {
 					tmpLocs.push_back(Location(move.row, tmp));
-				} else if (board[move.row][tmp] == currentPlayer->GetId()) {
+				} else if (board[move.row][tmp] == currentId) {
 					for (unsigned int j = 0; j < tmpLocs.size(); ++j) {
 						changedPieces.push_back(tmpLocs[j]);
 					}
@@ -262,9 +275,9 @@ void Game::Move() {
 			while (tmp1 >= 0 && tmp2 >= 0) {
 				if (board[tmp1][tmp2] == 0) {
 					break;
-				} else if (board[tmp1][tmp2] == enemyPlayer->GetId()) {
+				} else if (board[tmp1][tmp2] == enemyId) {
 					tmpLocs.push_back(Location(tmp1, tmp2));
-				} else if (board[tmp1][tmp2] == currentPlayer->GetId()) {
+				} else if (board[tmp1][tmp2] == currentId) {
 					for (unsigned int j = 0; j < tmpLocs.size(); ++j) {
 						changedPieces.push_back(tmpLocs[j]);
 					}
@@ -283,9 +296,9 @@ void Game::Move() {
 			while (tmp >= 0) {
 				if (board[tmp][move.column] == 0) {
 					break;
-				} else if (board[tmp][move.column] == enemyPlayer->GetId()) {
+				} else if (board[tmp][move.column] == enemyId) {
 					tmpLocs.push_back(Location(tmp, move.column));
-				} else if (board[tmp][move.column] == currentPlayer->GetId()) {
+				} else if (board[tmp][move.column] == currentId) {
 					for (unsigned int j = 0; j < tmpLocs.size(); ++j) {
 						changedPieces.push_back(tmpLocs[j]);
 					}
@@ -303,9 +316,9 @@ void Game::Move() {
 			while (tmp1 >= 0 && tmp2 < 8) {
 				if (board[tmp1][tmp2] == 0) {
 					break;
-				} else if (board[tmp1][tmp2] == enemyPlayer->GetId()) {
+				} else if (board[tmp1][tmp2] == enemyId) {
 					tmpLocs.push_back(Location(tmp1, tmp2));
-				} else if (board[tmp1][tmp2] == currentPlayer->GetId()) {
+				} else if (board[tmp1][tmp2] == currentId) {
 					for (unsigned int j = 0; j < tmpLocs.size(); ++j) {
 						changedPieces.push_back(tmpLocs[j]);
 					}
@@ -318,11 +331,7 @@ void Game::Move() {
 
 	}
 
-	// Update state
-	currentState = GameState::ApplyMove(currentState, changedPieces, currentPlayer->GetId());
-
-	// Switch player
-	currentPlayer = enemyPlayer;
+	return changedPieces;
 }
 
 void Game::PrintResults() {
@@ -574,4 +583,161 @@ vector<Location> Game::getAdjacentLocations(GameState state, Location l, int id)
 	}
 
 	return adjacent;
+}
+
+double Game::MinimaxSearch(GameState state, int depth, int maxDepth, int currentId, int enemyId) {
+	// Compile vector of children
+	vector<GameState> children = getChildren(state, currentId, enemyId);
+
+	// Simply evaluate if we are a leaf node or we are not searching any further
+	if (!(maxDepth - depth) || !children.size()) {
+		return heuristic(state, currentId, enemyId);
+	}
+
+	// Determine whether the current state is a max node or a min node based on depth
+	bool maxNode = (depth + 1) % 2 == 0; // Since we are starting at min states (driver passes children of current state) we need to offset by 1
+
+	if (maxNode) {
+		double val = INT_MIN;
+		for (unsigned int i = 0; i < children.size(); ++i) {
+			double tmpVal = MinimaxSearch(children[i], depth + 1, maxDepth, currentId, enemyId); // Don't swap the enemy and current id!(????)
+			if (tmpVal > val) {
+				val = tmpVal;
+			}
+		}
+		return val;
+	} else {
+		double val = INT_MAX;
+		for (unsigned int i = 0; i < children.size(); ++i) {
+			double tmpVal = MinimaxSearch(children[i], depth + 1, maxDepth, currentId, enemyId); // Don't swap the enemy and current id!(????)
+			if (tmpVal < val) {
+				val = tmpVal;
+			}
+		}
+		return val;
+	}
+}
+
+double Game::heuristic(GameState state, int currentId, int enemyId) {
+	vector<vector<int>> grid = state.GetBoard();
+
+	int myTiles = 0, enemyTiles = 0, i, j, k, myFrontTiles = 0, enemyFrontTiles = 0, x, y;
+	double p = 0, c = 0, l = 0, m = 0, f = 0, d = 0;
+
+	int X1 [] = { -1, -1, 0, 1, 1, 1, 0, -1 };
+	int Y1 [] = { 0, 1, 1, 1, 0, -1, -1, -1 };
+	int V[8][8] = {
+		{ 20, -3, 11, 8, 8, 11, -3, 20 },
+		{ -3, -7, -4, 1, 1, -4, -7, -3 },
+		{ 11, -4, 2, 2, 2, 2, -4, 11 },
+		{ 8, 1, 2, -3, -3, 2, 1, 8 },
+		{ 8, 1, 2, -3, -3, 2, 1, 8 },
+		{ 11, -4, 2, 2, 2, 2, -4, 11 },
+		{ -3, -7, -4, 1, 1, -4, -7, -3 },
+		{ 20, -3, 11, 8, 8, 11, -3, 20 }
+	};
+
+	// Piece difference, frontier disks and disk squares
+	for (i = 0; i<8; i++)
+		for (j = 0; j<8; j++)  {
+			if (grid[i][j] == currentId)  {
+				d += V[i][j];
+				myTiles++;
+			} else if (grid[i][j] == enemyId)  {
+				d -= V[i][j];
+				enemyTiles++;
+			}
+			if (grid[i][j] != 0)   {
+				for (k = 0; k<8; k++)  {
+					x = i + X1[k]; y = j + Y1[k];
+					if (x >= 0 && x < 8 && y >= 0 && y < 8 && grid[x][y] == 0) {
+						if (grid[i][j] == currentId)  myFrontTiles++;
+						else enemyFrontTiles++;
+						break;
+					}
+				}
+			}
+		}
+	if (myTiles > enemyTiles)
+		p = (100.0 * myTiles) / (myTiles + enemyTiles);
+	else if (myTiles < enemyTiles)
+		p = -(100.0 * enemyTiles) / (myTiles + enemyTiles);
+	else p = 0;
+
+	if (myFrontTiles > enemyFrontTiles)
+		f = -(100.0 * myFrontTiles) / (myFrontTiles + enemyFrontTiles);
+	else if (myFrontTiles < enemyFrontTiles)
+		f = (100.0 * enemyFrontTiles) / (myFrontTiles + enemyFrontTiles);
+	else f = 0;
+
+	// Corner occupancy
+	myTiles = enemyTiles = 0;
+	if (grid[0][0] == currentId) myTiles++;
+	else if (grid[0][0] == enemyId) enemyTiles++;
+	if (grid[0][7] == currentId) myTiles++;
+	else if (grid[0][7] == enemyId) enemyTiles++;
+	if (grid[7][0] == currentId) myTiles++;
+	else if (grid[7][0] == enemyId) enemyTiles++;
+	if (grid[7][7] == currentId) myTiles++;
+	else if (grid[7][7] == enemyId) enemyTiles++;
+	c = 25 * (myTiles - enemyTiles);
+
+	// Corner closeness
+	myTiles = enemyTiles = 0;
+	if (grid[0][0] == 0)   {
+		if (grid[0][1] == currentId) myTiles++;
+		else if (grid[0][1] == enemyId) enemyTiles++;
+		if (grid[1][1] == currentId) myTiles++;
+		else if (grid[1][1] == enemyId) enemyTiles++;
+		if (grid[1][0] == currentId) myTiles++;
+		else if (grid[1][0] == enemyId) enemyTiles++;
+	}
+	if (grid[0][7] == 0)   {
+		if (grid[0][6] == currentId) myTiles++;
+		else if (grid[0][6] == enemyId) enemyTiles++;
+		if (grid[1][6] == currentId) myTiles++;
+		else if (grid[1][6] == enemyId) enemyTiles++;
+		if (grid[1][7] == currentId) myTiles++;
+		else if (grid[1][7] == enemyId) enemyTiles++;
+	}
+	if (grid[7][0] == 0)   {
+		if (grid[7][1] == currentId) myTiles++;
+		else if (grid[7][1] == enemyId) enemyTiles++;
+		if (grid[6][1] == currentId) myTiles++;
+		else if (grid[6][1] == enemyId) enemyTiles++;
+		if (grid[6][0] == currentId) myTiles++;
+		else if (grid[6][0] == enemyId) enemyTiles++;
+	}
+	if (grid[7][7] == 0)   {
+		if (grid[6][7] == currentId) myTiles++;
+		else if (grid[6][7] == enemyId) enemyTiles++;
+		if (grid[6][6] == currentId) myTiles++;
+		else if (grid[6][6] == enemyId) enemyTiles++;
+		if (grid[7][6] == currentId) myTiles++;
+		else if (grid[7][6] == enemyId) enemyTiles++;
+	}
+	l = -12.5 * (myTiles - enemyTiles);
+
+	// Mobility
+	myTiles = LegalMoves(state, currentId).size();
+	enemyTiles = LegalMoves(state, enemyId).size();
+	if (myTiles > enemyTiles)
+		m = (100.0 * myTiles) / (myTiles + enemyTiles);
+	else if (myTiles < enemyTiles)
+		m = -(100.0 * enemyTiles) / (myTiles + enemyTiles);
+	else m = 0;
+
+	// Final weighted score
+	double score = (10 * p) + (801.724 * c) + (382.026 * l) + (78.922 * m) + (74.396 * f) + (10 * d);
+	return score;
+}
+
+vector<GameState> Game::getChildren(GameState state, int currentId, int enemyId) {
+	// Get all resulting states from legal moves
+	std::vector<Location> legal = Game::LegalMoves(state, currentId);
+	std::vector<GameState> newStates;
+	for (unsigned int i = 0; i < legal.size(); ++i) {
+		newStates.push_back(GameState::ApplyMove(state, Game::GetChangedPieces(state, legal[i], currentId, enemyId), currentId));
+	}
+	return newStates;
 }
