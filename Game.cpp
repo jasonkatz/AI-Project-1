@@ -587,7 +587,7 @@ vector<Location> Game::getAdjacentLocations(GameState state, Location l, int id)
 
 double Game::MinimaxSearch(GameState state, int depth, int maxDepth, int currentId, int enemyId) {
 	// Compile vector of children
-	vector<GameState> children = getChildren(state, currentId, enemyId);
+	vector<GameState> children = getChildren(state, enemyId, currentId); // Get children from enemy's point of view
 
 	// Simply evaluate if we are a leaf node or we are not searching any further
 	if (!(maxDepth - depth) || !children.size()) {

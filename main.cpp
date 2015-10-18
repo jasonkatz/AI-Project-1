@@ -51,7 +51,7 @@ int main() {
 	// Initialize game
 	Game game(p1, p2, timeLimit);
 
-	game = Game::FromFile("Testfile2.txt");
+	//game = Game::FromFile("Testfile2.txt");
 
 	/*
 	 * Game loop

@@ -45,7 +45,7 @@ Location ComputerPlayer::MakeMove(GameState state) {
 		children.push_back(GameState::ApplyMove(state, Game::GetChangedPieces(state, legal[i], currentId, enemyId), currentId));
 	}
 
-	int maxDepth = 4;
+	int maxDepth = 2;
 	int depth = 0;
 
 	// Get minimax values for each child node
