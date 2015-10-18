@@ -131,6 +131,7 @@ void Game::Move() {
 		} else {
 			cout << "No legal moves available; skipping turn" << endl;
 			lastSkipped = true;
+			currentPlayer = enemyPlayer;
 		}
 		return;
 	}
