@@ -21,6 +21,9 @@ Location ComputerPlayer::MakeMove(GameState state) {
 	 * Minimax Driver
 	 */
 
+	// Set up time limit
+	clock_t upperTimeLimit = std::clock() + Game::timeLimit * (clock_t) CLOCKS_PER_SEC;
+
 	// Get enemy id
 	int enemyId, currentId = id;
 	std::vector<std::vector<int>> board = state.GetBoard();
@@ -45,28 +48,33 @@ Location ComputerPlayer::MakeMove(GameState state) {
 		children.push_back(GameState::ApplyMove(state, Game::GetChangedPieces(state, legal[i], currentId, enemyId), currentId));
 	}
 
-	int maxDepth = 2;
+	// Iterative deepening search
+	int maxDepth = INT_MAX; // Set to maximum int value for ideal case
 	int depth = 0;
-
-	// Get minimax values for each child node
-	std::vector<double> vals;
-	for (unsigned int i = 0; i < children.size(); ++i) {
-		vals.push_back(Game::MinimaxSearch(children[i], depth, maxDepth, currentId, enemyId));
+	double bestVal = 0;
+	Location bestMove = legal[0];
+	for (depth = 1; depth < maxDepth; ++depth) {
+		// Check for timeout
+		if (std::clock() > upperTimeLimit) {
+			std::cout << "Out of time searching depth " << depth-- << std::endl;
+			break;
+		}
+		// Get minimax values for each child node
+		std::vector<double> vals;
+		for (unsigned int i = 0; i < children.size(); ++i) {
+			vals.push_back(Game::MinimaxSearch(children[i], INT_MIN, INT_MAX, 0, depth, currentId, enemyId, upperTimeLimit));
+		}
+		int index = std::distance(vals.begin(), std::max_element(vals.begin(), vals.end()));
+		// Check if best move is better than in the previous iteration of the search
+		if (vals[index] > bestVal) {
+			bestVal = vals[index];
+			bestMove = legal[index];
+		}
 	}
-	int index = std::distance(vals.begin(), std::max_element(vals.begin(), vals.end()));
-	
-	Location move =  legal[index];
-	return move;
 
-	// 2 second delay
-	clock_t t = std::clock() + 2 * (clock_t) CLOCKS_PER_SEC;
-	while (std::clock() < t) {
-		continue;
-	}
-	// Temporarily select a random legal move and return it
-	std::vector<Location> legalMoves = Game::LegalMoves(state, id);
-	srand((long) time(NULL));
-	return legalMoves[rand() % legalMoves.size()];
+	std::cout << "Completed search of depth " << depth << std::endl;
+
+	return bestMove;
 }
 
 Location HumanPlayer::MakeMove(GameState state) {

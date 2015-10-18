@@ -15,6 +15,7 @@ public:
 	// Really helpful when dealing with legal moves so we don't have to recompute adjacency direcions
 	std::string extras;
 
+	Location();
 	Location(int, int);
 	Location(int, int, std::string);
 

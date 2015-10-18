@@ -5,6 +5,7 @@
 #include <sstream>
 #include <algorithm>
 #include <climits>
+#include <ctime>
 
 #include "Game.h"
 
@@ -13,13 +14,15 @@ using std::endl;
 using std::vector;
 using std::string;
 
+int Game::timeLimit = 10; // Set default time limit to 10 seconds
+
 Game::Game(Player * p1, Player * p2, int limit) {
 	isOver = false;
 	lastSkipped = false;
 
 	player1 = p1;
 	player2 = p2;
-	timeLimit = limit;
+	Game::timeLimit = limit;
 
 	currentPlayer = player1;
 	currentState = GameState(p1->GetId(), p2->GetId());
@@ -31,7 +34,7 @@ Game::Game(Player * p1, Player * p2, int limit, GameState state, int currentId) 
 
 	player1 = p1;
 	player2 = p2;
-	timeLimit = limit;
+	Game::timeLimit = limit;
 
 	// Repopulate current state with correct ids
 	vector<vector<int>> newBoard = state.GetBoard();
@@ -585,12 +588,19 @@ vector<Location> Game::getAdjacentLocations(GameState state, Location l, int id)
 	return adjacent;
 }
 
-double Game::MinimaxSearch(GameState state, int depth, int maxDepth, int currentId, int enemyId) {
+double Game::MinimaxSearch(GameState state, double min, double max, int depth, int maxDepth, int currentId, int enemyId, clock_t upperTimeLimit) {
+	// Check if timed out
+	bool timedOut = false;
+	if (std::clock() > upperTimeLimit) {
+		timedOut = true;
+	}
+
 	// Compile vector of children
 	vector<GameState> children = getChildren(state, enemyId, currentId); // Get children from enemy's point of view
 
-	// Simply evaluate if we are a leaf node or we are not searching any further
-	if (!(maxDepth - depth) || !children.size()) {
+	// We simply evaluate the heuristic of a node if we've timed out,
+	// if we have reached the maximum depth, or there are no children
+	if (timedOut || !(maxDepth - depth) || !children.size()) {
 		return heuristic(state, currentId, enemyId);
 	}
 
@@ -598,20 +608,26 @@ double Game::MinimaxSearch(GameState state, int depth, int maxDepth, int current
 	bool maxNode = (depth + 1) % 2 == 0; // Since we are starting at min states (driver passes children of current state) we need to offset by 1
 
 	if (maxNode) {
-		double val = INT_MIN;
+		double val = min;
 		for (unsigned int i = 0; i < children.size(); ++i) {
-			double tmpVal = MinimaxSearch(children[i], depth + 1, maxDepth, currentId, enemyId); // Don't swap the enemy and current id!(????)
+			double tmpVal = MinimaxSearch(children[i], val, max, depth + 1, maxDepth, currentId, enemyId, upperTimeLimit); // Don't swap the enemy and current id!(????)
 			if (tmpVal > val) {
 				val = tmpVal;
+			}
+			if (val > max) {
+				return max;
 			}
 		}
 		return val;
 	} else {
-		double val = INT_MAX;
+		double val = min;
 		for (unsigned int i = 0; i < children.size(); ++i) {
-			double tmpVal = MinimaxSearch(children[i], depth + 1, maxDepth, currentId, enemyId); // Don't swap the enemy and current id!(????)
+			double tmpVal = MinimaxSearch(children[i], min, val, depth + 1, maxDepth, currentId, enemyId, upperTimeLimit); // Don't swap the enemy and current id!(????)
 			if (tmpVal < val) {
 				val = tmpVal;
+			}
+			if (val < min) {
+				return min;
 			}
 		}
 		return val;

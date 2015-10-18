@@ -21,9 +21,6 @@ class Game {
 	// All previous states of the board
 	std::vector<GameState> history;
 
-	// The time limit, in seconds, that a computer player has to make a move
-	int timeLimit;
-
 	// Keeps track of states where the previous turn was skipped due to a lack of turns
 	bool lastSkipped;
 
@@ -37,6 +34,9 @@ class Game {
 	static std::vector<GameState> getChildren(GameState, int, int);
 
 public:
+
+	// The time limit, in seconds, that a computer player has to make a move
+	static int timeLimit;
 
 	// Flag for game over
 	bool isOver;
@@ -69,7 +69,7 @@ public:
 
 	// Searches the game tree for the best move
 	// and selects a move after provided time limit or entire tree searched
-	static double MinimaxSearch(GameState, int, int, int, int);
+	static double MinimaxSearch(GameState, double, double, int, int, int, int, clock_t);
 
 	// Finds all locations that would be changed by a given move from a state
 	static std::vector<Location> GetChangedPieces(GameState, Location, int, int);
