@@ -40,40 +40,23 @@ Location ComputerPlayer::MakeMove(GameState state) {
 		}
 	}
 
-	// Get all children states from legal moves
-	std::vector<Location> legal = Game::LegalMoves(state, currentId);
-	std::vector<GameState> children;
-	for (unsigned int i = 0; i < legal.size(); ++i) {
-		children.push_back(GameState::ApplyMove(state, Game::GetChangedPieces(state, legal[i], currentId, enemyId), currentId));
-	}
-
 	// Iterative deepening search
 	int maxDepth = INT_MAX; // Set to maximum int value for ideal case
-	int depth = 0;
-	double bestVal = 0;
-	Location bestMove = legal[0];
-	for (depth = 1; depth < maxDepth; ++depth) {
+	int depth;
+	MoveVal move;
+	for (depth = 0; depth < maxDepth; ++depth) {
 		// Check for timeout
 		if (std::clock() > upperTimeLimit) {
 			std::cout << "Out of time searching depth " << depth-- << std::endl;
 			break;
 		}
-		// Get minimax values for each child node
-		std::vector<double> vals;
-		for (unsigned int i = 0; i < children.size(); ++i) {
-			vals.push_back(Game::MinimaxSearch(children[i], INT_MIN, INT_MAX, 0, depth, currentId, enemyId, upperTimeLimit));
-		}
-		int index = std::distance(vals.begin(), std::max_element(vals.begin(), vals.end()));
-		// Check if best move is better than in the previous iteration of the search
-		if (vals[index] > bestVal) {
-			bestVal = vals[index];
-			bestMove = legal[index];
-		}
+		// Get minimax chosen move
+		move = Game::MinimaxSearch(state, INT_MIN, INT_MAX, 0, depth, currentId, enemyId, upperTimeLimit);
 	}
 
 	std::cout << "Completed search of depth " << depth << std::endl;
 
-	return bestMove;
+	return move.move;
 }
 
 Location HumanPlayer::MakeMove(GameState state) {

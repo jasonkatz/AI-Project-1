@@ -49,10 +49,11 @@ class MoveVal {
 
 public:
 
-	int value;
+	double value;
 	Location move;
 
-	MoveVal(int, Location);
+	MoveVal();
+	MoveVal(double, Location);
 
 };
 

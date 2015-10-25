@@ -31,8 +31,9 @@ class Game {
 	// Heuristic function that returns a value for a specific state and player id
 	static double heuristic(GameState, int, int);
 
-	// Returns all children of a certain state given player ids
-	static std::vector<GameState> getChildren(GameState, int, int);
+	// Returns all children of a certain state given player ids;
+	// If legalMoves pointer is supplied, then it gets set to a vector of legal moves
+	static std::vector<GameState> getChildren(GameState, int, int, std::vector<Location> * legalMoves = NULL);
 
 public:
 
@@ -70,7 +71,7 @@ public:
 
 	// Searches the game tree for the best move
 	// and selects a move after provided time limit or entire tree searched
-	static double MinimaxSearch(GameState, double, double, int, int, int, int, clock_t);
+	static MoveVal MinimaxSearch(GameState, double, double, int, int, int, int, clock_t);
 
 	// Finds all locations that would be changed by a given move from a state
 	static std::vector<Location> GetChangedPieces(GameState, Location, int, int);

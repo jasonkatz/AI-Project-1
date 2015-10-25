@@ -40,10 +40,12 @@ Game::Game(Player * p1, Player * p2, int limit, GameState state, int currentId) 
 	int newBoard[8][8];
 	for (int i = 0; i < 8; ++i) {
 		for (int j = 0; j < 8; ++j) {
-			if (newBoard[i][j] == 1) {
+			if (state.board[i][j] == 1) {
 				newBoard[i][j] = player1->GetId();
-			} else if (newBoard[i][j] == 2) {
+			} else if (state.board[i][j] == 2) {
 				newBoard[i][j] = player2->GetId();
+			} else {
+				newBoard[i][j] = 0;
 			}
 		}
 	}
@@ -526,7 +528,7 @@ Game Game::FromFile(string fileName) {
 	int time;
 	iss2 >> time;
 
-	return Game(new ComputerPlayer(), new ComputerPlayer(), time, GameState(b), currentPlayerId);
+	return Game(new ComputerPlayer(), new ComputerPlayer(), time, state, currentPlayerId);
 }
 
 vector<Location> Game::getAdjacentLocations(GameState state, Location l, int id) {
@@ -580,49 +582,57 @@ vector<Location> Game::getAdjacentLocations(GameState state, Location l, int id)
 	return adjacent;
 }
 
-double Game::MinimaxSearch(GameState state, double min, double max, int depth, int maxDepth, int currentId, int enemyId, clock_t upperTimeLimit) {
+MoveVal Game::MinimaxSearch(GameState state, double min, double max, int depth, int maxDepth, int currentId, int enemyId, clock_t upperTimeLimit) {
 	// Check if timed out
 	bool timedOut = false;
 	if (std::clock() > upperTimeLimit) {
-		timedOut = true;
+		//timedOut = true;
 	}
 
 	// Compile vector of children
-	vector<GameState> children = getChildren(state, enemyId, currentId); // Get children from enemy's point of view
+	vector<Location> legalMoves;
+	vector<GameState> children = getChildren(state, currentId, enemyId, &legalMoves); // Get children from enemy's point of view
 
 	// We simply evaluate the heuristic of a node if we've timed out,
 	// if we have reached the maximum depth, or there are no children
 	if (timedOut || !(maxDepth - depth) || !children.size()) {
-		return heuristic(state, currentId, enemyId);
+		// Return heuristic value with empty location to be set by caller
+		return MoveVal(heuristic(state, currentId, enemyId), Location()); // TODO: THIS IS A HUGE PROBLEM
 	}
 
 	// Determine whether the current state is a max node or a min node based on depth
-	bool maxNode = (depth + 1) % 2 == 0; // Since we are starting at min states (driver passes children of current state) we need to offset by 1
+	bool maxNode = (depth) % 2 == 0; // Since we are starting at max states, even depth means we are at a max node
 
 	if (maxNode) {
-		double val = min;
+		double bestVal = min;
+		Location bestMove;
 		for (unsigned int i = 0; i < children.size(); ++i) {
-			double tmpVal = MinimaxSearch(children[i], val, max, depth + 1, maxDepth, currentId, enemyId, upperTimeLimit); // Don't swap the enemy and current id!(????)
-			if (tmpVal > val) {
-				val = tmpVal;
+			MoveVal move = MinimaxSearch(children[i], bestVal, max, depth + 1, maxDepth, currentId, enemyId, upperTimeLimit); // Don't swap the enemy and current id!(????)
+			move.move = legalMoves[i]; // Set this so we get a meaningful move (in case of a leaf)
+			if (move.value > bestVal) {
+				bestVal = move.value;
+				bestMove = move.move;
 			}
-			if (val > max) {
-				return max;
+			if (bestVal > max) {
+				return MoveVal(max, move.move);
 			}
 		}
-		return val;
+		return MoveVal(bestVal, bestMove);
 	} else {
-		double val = min;
+		double bestVal = max;
+		Location bestMove;
 		for (unsigned int i = 0; i < children.size(); ++i) {
-			double tmpVal = MinimaxSearch(children[i], min, val, depth + 1, maxDepth, currentId, enemyId, upperTimeLimit); // Don't swap the enemy and current id!(????)
-			if (tmpVal < val) {
-				val = tmpVal;
+			MoveVal move = MinimaxSearch(children[i], min, bestVal, depth + 1, maxDepth, currentId, enemyId, upperTimeLimit); // Don't swap the enemy and current id!(????)
+			move.move = legalMoves[i];
+			if (move.value < bestVal) {
+				bestVal = move.value;
+				bestMove = move.move;
 			}
-			if (val < min) {
-				return min;
+			if (bestVal < min) {
+				return MoveVal(min, move.move);
 			}
 		}
-		return val;
+		return MoveVal(min, bestMove);
 	}
 }
 
@@ -739,9 +749,14 @@ double Game::heuristic(GameState state, int currentId, int enemyId) {
 	return score;
 }
 
-vector<GameState> Game::getChildren(GameState state, int currentId, int enemyId) {
-	// Get all resulting states from legal moves
+vector<GameState> Game::getChildren(GameState state, int currentId, int enemyId, vector<Location> * legalMoves) {
+	// Get all legal moves
 	std::vector<Location> legal = Game::LegalMoves(state, currentId);
+	if (legalMoves) {
+		*legalMoves = legal;
+	}
+
+	// Get resulting states from legal moves
 	std::vector<GameState> newStates;
 	for (unsigned int i = 0; i < legal.size(); ++i) {
 		newStates.push_back(GameState::ApplyMove(state, Game::GetChangedPieces(state, legal[i], currentId, enemyId), currentId));

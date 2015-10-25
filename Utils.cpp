@@ -63,7 +63,9 @@ std::ostream& operator<<(std::ostream& os, const Location& l) {
 	return os;
 }
 
-MoveVal::MoveVal(int v, Location m) {
+MoveVal::MoveVal() : MoveVal(0, Location()) { }
+
+MoveVal::MoveVal(double v, Location m) {
 	value = v;
 	move = m;
 }
