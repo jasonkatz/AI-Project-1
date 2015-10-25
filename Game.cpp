@@ -74,10 +74,10 @@ void Game::PrintBoard() {
 
 	// Print the board
 	cout << endl << "Current board:" << endl << endl;
-	//cout << "Player 1 is " << colors[1] << symbols[0] << endl;
-	//cout << "Player 2 is " << colors[2] << symbols[1] << endl;
-	cout << "Player 1 is " << symbols[1] << endl;
-	cout << "Player 2 is " << symbols[2] << endl << endl;
+	cout << "Player 1 is " << colors[1] << symbols[1] << colors[0] << endl;
+	cout << "Player 2 is " << colors[2] << symbols[2] << colors[0] << endl << endl;
+	//cout << "Player 1 is " << symbols[1] << endl;
+	//cout << "Player 2 is " << symbols[2] << endl << endl;
 	cout << "     0   1   2   3   4   5   6   7  " << endl;
 	cout << "   ---------------------------------" << endl;
 	for (int i = 0; i < 8; ++i) {
@@ -100,8 +100,8 @@ void Game::PrintBoard() {
 			} else if (currentState.board[i][j] == player2->GetId()) {
 				color = colors[2];
 			}
-			cout << symbol << " ";
-			//cout << "| " << color << symbol << colors[0] << " ";
+			//cout << symbol << " ";
+			cout << color << symbol << colors[0] << " ";
 		}
 		cout << "|" << endl << "   ";
 		for (int j = 0; j < 8; ++j) {
