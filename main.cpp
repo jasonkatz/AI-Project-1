@@ -63,6 +63,6 @@ int main() {
 
 	game.PrintResults();
 
-	system("pause");
+	//system("pause");
 	return 0;
 }
