@@ -514,6 +514,11 @@ std::vector<Location> Game::LegalMoves(GameState state, int id) {
 Game Game::FromFile(string fileName) {
 	std::ifstream file(fileName);
 
+	if (!file.is_open()) {
+		cout << "Enter a valid filename!" << endl;
+		exit(1);
+	}
+
 	int b[8][8];
 	for (int i = 0; i < 8; ++i) {
 		for (int j = 0; j < 8; ++j) {
@@ -535,6 +540,8 @@ Game Game::FromFile(string fileName) {
 	std::istringstream iss2(line);
 	int time;
 	iss2 >> time;
+
+	file.close();
 
 	return Game(new ComputerPlayer(), new ComputerPlayer(), time, state, currentPlayerId);
 }
