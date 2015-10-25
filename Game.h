@@ -71,7 +71,7 @@ public:
 
 	// Searches the game tree for the best move
 	// and selects a move after provided time limit or entire tree searched
-	static MoveVal MinimaxSearch(GameState, double, double, int, int, int, int, clock_t);
+	static MoveVal MinimaxSearch(GameState, double, double, int, int, int, int, clock_t, int * depthTracker);
 
 	// Finds all locations that would be changed by a given move from a state
 	static std::vector<Location> GetChangedPieces(GameState, Location, int, int);

@@ -44,6 +44,7 @@ Location ComputerPlayer::MakeMove(GameState state) {
 	int maxDepth = INT_MAX; // Set to maximum int value for ideal case
 	int depth;
 	MoveVal move;
+	int oldTracker = -1; // If the depth searched is the same over two runs, then we break out since we've exhausted the tree
 	for (depth = 0; depth < maxDepth; ++depth) {
 		// Check for timeout
 		if (std::clock() > upperTimeLimit) {
@@ -51,7 +52,13 @@ Location ComputerPlayer::MakeMove(GameState state) {
 			break;
 		}
 		// Get minimax chosen move
-		move = Game::MinimaxSearch(state, INT_MIN, INT_MAX, 0, depth, currentId, enemyId, upperTimeLimit);
+		int depthTracker = 0; // Used to check if we are out of states to check (compare with oldTracker)
+		move = Game::MinimaxSearch(state, INT_MIN, INT_MAX, 0, depth, currentId, enemyId, upperTimeLimit, &depthTracker);
+		if (depthTracker == oldTracker) {
+			break;
+		} else {
+			oldTracker = depthTracker;
+		}
 	}
 
 	std::cout << "Completed search of depth " << depth << std::endl;

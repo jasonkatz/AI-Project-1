@@ -582,32 +582,42 @@ vector<Location> Game::getAdjacentLocations(GameState state, Location l, int id)
 	return adjacent;
 }
 
-MoveVal Game::MinimaxSearch(GameState state, double min, double max, int depth, int maxDepth, int currentId, int enemyId, clock_t upperTimeLimit) {
+MoveVal Game::MinimaxSearch(GameState state, double min, double max, int depth, int maxDepth, int currentId, int enemyId, clock_t upperTimeLimit, int * depthTracker) {
+	// Conditionally increment depthTracker
+	if (depth > *depthTracker) {
+		++(*depthTracker);
+	}
+
 	// Check if timed out
 	bool timedOut = false;
 	if (std::clock() > upperTimeLimit) {
-		//timedOut = true;
-	}
-
-	// Compile vector of children
-	vector<Location> legalMoves;
-	vector<GameState> children = getChildren(state, currentId, enemyId, &legalMoves); // Get children from enemy's point of view
-
-	// We simply evaluate the heuristic of a node if we've timed out,
-	// if we have reached the maximum depth, or there are no children
-	if (timedOut || !(maxDepth - depth) || !children.size()) {
-		// Return heuristic value with empty location to be set by caller
-		return MoveVal(heuristic(state, currentId, enemyId), Location()); // TODO: THIS IS A HUGE PROBLEM
+		timedOut = true;
 	}
 
 	// Determine whether the current state is a max node or a min node based on depth
 	bool maxNode = (depth) % 2 == 0; // Since we are starting at max states, even depth means we are at a max node
 
+	// Compile vector of children
+	vector<Location> legalMoves;
+	vector<GameState> children;
+	if (maxNode) {
+		children = getChildren(state, currentId, enemyId, &legalMoves); // Get children from current player's point of view if max state
+	} else {
+		children = getChildren(state, enemyId, currentId, &legalMoves); // Get children from enemy's point of view if min state
+	}
+
+	// We simply evaluate the heuristic of a node if we've timed out,
+	// if we have reached the maximum depth, or there are no children
+	if (timedOut || !(maxDepth - depth) || !children.size()) {
+		// Return heuristic value with empty location to be set by caller
+		return MoveVal(heuristic(state, currentId, enemyId), Location());
+	}
+
 	if (maxNode) {
 		double bestVal = min;
 		Location bestMove;
 		for (unsigned int i = 0; i < children.size(); ++i) {
-			MoveVal move = MinimaxSearch(children[i], bestVal, max, depth + 1, maxDepth, currentId, enemyId, upperTimeLimit); // Don't swap the enemy and current id!(????)
+			MoveVal move = MinimaxSearch(children[i], bestVal, max, depth + 1, maxDepth, currentId, enemyId, upperTimeLimit, depthTracker);
 			move.move = legalMoves[i]; // Set this so we get a meaningful move (in case of a leaf)
 			if (move.value > bestVal) {
 				bestVal = move.value;
@@ -622,8 +632,8 @@ MoveVal Game::MinimaxSearch(GameState state, double min, double max, int depth, 
 		double bestVal = max;
 		Location bestMove;
 		for (unsigned int i = 0; i < children.size(); ++i) {
-			MoveVal move = MinimaxSearch(children[i], min, bestVal, depth + 1, maxDepth, currentId, enemyId, upperTimeLimit); // Don't swap the enemy and current id!(????)
-			move.move = legalMoves[i];
+			MoveVal move = MinimaxSearch(children[i], min, bestVal, depth + 1, maxDepth, currentId, enemyId, upperTimeLimit, depthTracker);
+			move.move = legalMoves[i]; // Set this so we get a meaningful move (in case of a leaf)
 			if (move.value < bestVal) {
 				bestVal = move.value;
 				bestMove = move.move;
@@ -632,7 +642,7 @@ MoveVal Game::MinimaxSearch(GameState state, double min, double max, int depth, 
 				return MoveVal(min, move.move);
 			}
 		}
-		return MoveVal(min, bestMove);
+		return MoveVal(bestVal, bestMove);
 	}
 }
 
