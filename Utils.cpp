@@ -69,3 +69,8 @@ MoveVal::MoveVal(double v, Location m) {
 	value = v;
 	move = m;
 }
+
+std::ostream& operator<<(std::ostream& os, const MoveVal& m) {
+	os << "(" << m.move.row << ", " << m.move.column << "): " << m.value;
+	return os;
+}

@@ -55,6 +55,8 @@ public:
 	MoveVal();
 	MoveVal(double, Location);
 
+	friend std::ostream& operator<<(std::ostream&, const MoveVal&);
+
 };
 
 #endif
