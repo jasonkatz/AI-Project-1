@@ -1,3 +1,13 @@
+/*
+ *****************************************
+ Jason Katz
+ ECE-469 Project 1: Othello AI
+
+ Uses iterative deepening minimax
+ search with alpha-beta pruning
+ *****************************************
+ */
+
 #include <iostream>
 #include <limits>
 
