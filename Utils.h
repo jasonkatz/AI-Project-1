@@ -27,9 +27,9 @@ public:
 
 class GameState {
 
-	std::vector<std::vector<int>> board;
-
 public:
+
+	int board[8][8];
 
 	// Initialize empty board
 	GameState();
@@ -37,13 +37,22 @@ public:
 	// Initialize starting board with provided player ids
 	GameState(int, int);
 
-	GameState(std::vector<std::vector<int>>);
-
-	std::vector<std::vector<int>> GetBoard();
+	GameState(int[8][8]);
 
 	// Changes locations in given state that are provided in vector
 	// to provided id; this generally corresponds to a move
 	static GameState ApplyMove(GameState, std::vector<Location>, int);
+
+};
+
+class MoveVal {
+
+public:
+
+	int value;
+	Location move;
+
+	MoveVal(int, Location);
 
 };
 

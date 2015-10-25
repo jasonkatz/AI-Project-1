@@ -26,12 +26,11 @@ Location ComputerPlayer::MakeMove(GameState state) {
 
 	// Get enemy id
 	int enemyId, currentId = id;
-	std::vector<std::vector<int>> board = state.GetBoard();
 	for (int i = 0; i < 8; ++i) {
 		bool found = false;
 		for (int j = 0; j < 8; ++j) {
-			if (board[i][j] && board[i][j] != currentId) {
-				enemyId = board[i][j];
+			if (state.board[i][j] && state.board[i][j] != currentId) {
+				enemyId = state.board[i][j];
 				found = true;
 				break;
 			}
