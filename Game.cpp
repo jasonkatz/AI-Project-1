@@ -124,8 +124,15 @@ void Game::Move() {
 	}
 	cout << " to move:" << endl;
 
+	// Display all legal moves
+	std::cout << "Legal moves:" << std::endl;
+	std::vector<Location> legalMoves = Game::LegalMoves(currentState, currentPlayer->GetId());
+	for (unsigned int i = 0; i < legalMoves.size(); ++i) {
+		std::cout << legalMoves[i] << std::endl;
+	}
+
 	// If no legal moves, output notice and return
-	if (LegalMoves(currentState, currentPlayer->GetId()).size() == 0) {
+	if (!legalMoves.size()) {
 		// Check for game end
 		if (lastSkipped) {
 			isOver = true;
@@ -143,6 +150,7 @@ void Game::Move() {
 
 	// Get move from player; legality is checked here, so we will always get a legal move
 	Location move = currentPlayer->MakeMove(currentState);
+	cout << "Chosen move: " << move << endl;
 
 	// Get changed pieces
 	vector<Location> changedPieces = GetChangedPieces(currentState, move, currentPlayer->GetId(), enemyPlayer->GetId());

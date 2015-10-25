@@ -45,7 +45,7 @@ Location ComputerPlayer::MakeMove(GameState state) {
 	int depth;
 	MoveVal move;
 	int oldTracker = -1; // If the depth searched is the same over two runs, then we break out since we've exhausted the tree
-	for (depth = 0; depth < maxDepth; ++depth) {
+	for (depth = 1; depth < maxDepth; ++depth) { // Start searching up to depth 1 since searching up to depth 0 does nothing
 		// Check for timeout
 		if (std::clock() > upperTimeLimit) {
 			std::cout << "Out of time searching depth " << depth-- << std::endl;
@@ -54,6 +54,7 @@ Location ComputerPlayer::MakeMove(GameState state) {
 		// Get minimax chosen move
 		int depthTracker = 0; // Used to check if we are out of states to check (compare with oldTracker)
 		move = Game::MinimaxSearch(state, INT_MIN, INT_MAX, 0, depth, currentId, enemyId, upperTimeLimit, &depthTracker);
+		// Check if we have reached the end of the tree
 		if (depthTracker == oldTracker) {
 			break;
 		} else {
@@ -67,13 +68,6 @@ Location ComputerPlayer::MakeMove(GameState state) {
 }
 
 Location HumanPlayer::MakeMove(GameState state) {
-	// Display all legal moves
-	std::cout << "Legal moves:" << std::endl;
-	std::vector<Location> legalMoves = Game::LegalMoves(state, id);
-	for (unsigned int i = 0; i < legalMoves.size(); ++i) {
-		std::cout << legalMoves[i] << std::endl;
-	}
-
 	Location * pDesiredMove;
 	bool isLegal;
 
@@ -103,6 +97,7 @@ Location HumanPlayer::MakeMove(GameState state) {
 		pDesiredMove = new Location(row, column);
 
 		// Check if move is legal
+		std::vector<Location> legalMoves = Game::LegalMoves(state, id);
 		isLegal = std::find(legalMoves.begin(), legalMoves.end(), *pDesiredMove) != legalMoves.end();
 		if (!isLegal) {
 			std::cout << "Enter a legal move!" << std::endl;

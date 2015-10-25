@@ -28,8 +28,8 @@ int main() {
 	do {
 		cout << "Specify whether you want player 1 to be a (h)uman or a (c)omputer: ";
 		cin >> p1Type;
-	} while (p1Type[0] != 'h' && p1Type[0] != 'c');
-	if (p1Type[0] == 'h') {
+	} while (p1Type[0] != 'h' && p1Type[0] != 'H' && p1Type[0] != 'c' && p1Type[0] != 'C');
+	if (p1Type[0] == 'h' || p1Type[0] == 'H') {
 		p1 = new HumanPlayer();
 	} else {
 		p1 = new ComputerPlayer();
@@ -41,8 +41,8 @@ int main() {
 	do {
 		cout << "Specify whether you want player 2 to be a (h)uman or a (c)omputer: ";
 		cin >> p2Type;
-	} while (p2Type[0] != 'h' && p2Type[0] != 'c');
-	if (p2Type[0] == 'h') {
+	} while (p2Type[0] != 'h' && p2Type[0] != 'H' && p2Type[0] != 'c' && p2Type[0] != 'C');
+	if (p2Type[0] == 'h' || p2Type[0] == 'H') {
 		p2 = new HumanPlayer();
 	} else {
 		p2 = new ComputerPlayer();
@@ -51,7 +51,18 @@ int main() {
 	// Initialize game
 	Game game(p1, p2, timeLimit);
 
-	//game = Game::FromFile("Testfile.txt");
+	// Load from file?
+	string fromFile;
+	string fileName;
+	do {
+		cout << "Specify whether you want to load a game state from a file (y or n): ";
+		cin >> fromFile;
+	} while (fromFile[0] != 'y' && fromFile[0] != 'Y' && fromFile[0] != 'n' && fromFile[0] != 'N');
+	if (fromFile[0] == 'y' || fromFile[0] == 'Y') {
+		cout << "Enter the name of the file you'd like to load from: ";
+		cin >> fileName;
+		game = Game::FromFile(fileName);
+	}
 
 	/*
 	 * Game loop
