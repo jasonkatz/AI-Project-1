@@ -5,6 +5,10 @@
 
  Uses iterative deepening minimax
  search with alpha-beta pruning
+
+ Heuristic is heavily based off of function from
+ https://kartikkukreja.wordpress.com/2013/03/30/heuristic-function-for-reversiothello/
+ and slightly modified to fit the purposes of this project
  *****************************************
  */
 

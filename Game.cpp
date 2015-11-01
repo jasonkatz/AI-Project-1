@@ -650,9 +650,12 @@ MoveVal Game::MinimaxSearch(GameState state, double min, double max, int depth, 
 }
 
 double Game::heuristic(GameState state, int currentId, int enemyId) {
+	// Heuristic is heavily based off of function from
+	// https://kartikkukreja.wordpress.com/2013/03/30/heuristic-function-for-reversiothello/
+	// and slightly modified to fit the purposes of this project
 
 	int myTiles = 0, enemyTiles = 0, i, j, k, myFrontTiles = 0, enemyFrontTiles = 0, x, y;
-	double p = 0, c = 0, l = 0, m = 0, f = 0, d = 0;
+	double percentage = 0, corner = 0, closeness = 0, mobility = 0, frontier = 0, difference = 0;
 
 	int X1 [] = { -1, -1, 0, 1, 1, 1, 0, -1 };
 	int Y1 [] = { 0, 1, 1, 1, 0, -1, -1, -1 };
@@ -668,17 +671,17 @@ double Game::heuristic(GameState state, int currentId, int enemyId) {
 	};
 
 	// Piece difference, frontier disks and disk squares
-	for (i = 0; i<8; i++)
-		for (j = 0; j<8; j++)  {
+	for (i = 0; i < 8; i++) {
+		for (j = 0; j < 8; j++)  {
 			if (state.board[i][j] == currentId)  {
-				d += V[i][j];
+				difference += V[i][j];
 				myTiles++;
 			} else if (state.board[i][j] == enemyId)  {
-				d -= V[i][j];
+				difference -= V[i][j];
 				enemyTiles++;
 			}
 			if (state.board[i][j] != 0)   {
-				for (k = 0; k<8; k++)  {
+				for (k = 0; k < 8; k++)  {
 					x = i + X1[k]; y = j + Y1[k];
 					if (x >= 0 && x < 8 && y >= 0 && y < 8 && state.board[x][y] == 0) {
 						if (state.board[i][j] == currentId)  myFrontTiles++;
@@ -688,17 +691,23 @@ double Game::heuristic(GameState state, int currentId, int enemyId) {
 				}
 			}
 		}
-	if (myTiles > enemyTiles)
-		p = (100.0 * myTiles) / (myTiles + enemyTiles);
-	else if (myTiles < enemyTiles)
-		p = -(100.0 * enemyTiles) / (myTiles + enemyTiles);
-	else p = 0;
+	}
 
-	if (myFrontTiles > enemyFrontTiles)
-		f = -(100.0 * myFrontTiles) / (myFrontTiles + enemyFrontTiles);
-	else if (myFrontTiles < enemyFrontTiles)
-		f = (100.0 * enemyFrontTiles) / (myFrontTiles + enemyFrontTiles);
-	else f = 0;
+	if (myTiles > enemyTiles) {
+		percentage = (myTiles / (myTiles + enemyTiles)) * 100;
+	} else if (myTiles < enemyTiles) {
+		percentage = -(enemyTiles / (myTiles + enemyTiles)) * 100;
+	} else {
+		percentage = 0;
+	}
+
+	if (myFrontTiles > enemyFrontTiles) {
+		frontier = -(100.0 * myFrontTiles) / (myFrontTiles + enemyFrontTiles);
+	} else if (myFrontTiles < enemyFrontTiles) {
+		frontier = (100.0 * enemyFrontTiles) / (myFrontTiles + enemyFrontTiles);
+	} else {
+		frontier = 0;
+	}
 
 	// Corner occupancy
 	myTiles = enemyTiles = 0;
@@ -710,7 +719,7 @@ double Game::heuristic(GameState state, int currentId, int enemyId) {
 	else if (state.board[7][0] == enemyId) enemyTiles++;
 	if (state.board[7][7] == currentId) myTiles++;
 	else if (state.board[7][7] == enemyId) enemyTiles++;
-	c = 25 * (myTiles - enemyTiles);
+	corner = 25 * (myTiles - enemyTiles);
 
 	// Corner closeness
 	myTiles = enemyTiles = 0;
@@ -746,19 +755,21 @@ double Game::heuristic(GameState state, int currentId, int enemyId) {
 		if (state.board[7][6] == currentId) myTiles++;
 		else if (state.board[7][6] == enemyId) enemyTiles++;
 	}
-	l = -12.5 * (myTiles - enemyTiles);
+	closeness = -12.5 * (myTiles - enemyTiles);
 
 	// Mobility
 	myTiles = LegalMoves(state, currentId).size();
 	enemyTiles = LegalMoves(state, enemyId).size();
-	if (myTiles > enemyTiles)
-		m = (100.0 * myTiles) / (myTiles + enemyTiles);
-	else if (myTiles < enemyTiles)
-		m = -(100.0 * enemyTiles) / (myTiles + enemyTiles);
-	else m = 0;
+	if (myTiles > enemyTiles) {
+		mobility = (100.0 * myTiles) / (myTiles + enemyTiles);
+	} else if (myTiles < enemyTiles) {
+		mobility = -(100.0 * enemyTiles) / (myTiles + enemyTiles);
+	} else {
+		mobility = 0;
+	}
 
 	// Final weighted score
-	double score = (10 * p) + (801.724 * c) + (382.026 * l) + (78.922 * m) + (74.396 * f) + (10 * d);
+	double score = (10 * percentage) + (750 * corner) + (375 * closeness) + (80 * mobility) + (75 * frontier) + (10 * difference);
 	return score;
 }
 

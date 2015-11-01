@@ -22,6 +22,7 @@ Location ComputerPlayer::MakeMove(GameState state) {
 	 */
 
 	// Set up time limit
+	clock_t startTime = std::clock();
 	clock_t upperTimeLimit = std::clock() + Game::timeLimit * (clock_t) CLOCKS_PER_SEC;
 
 	// Get enemy id
@@ -43,26 +44,32 @@ Location ComputerPlayer::MakeMove(GameState state) {
 	// Iterative deepening search
 	int maxDepth = INT_MAX; // Set to maximum int value for ideal case
 	int depth;
-	MoveVal move;
+	MoveVal move, oldMove;
 	int oldTracker = -1; // If the depth searched is the same over two runs, then we break out since we've exhausted the tree
 	for (depth = 1; depth < maxDepth; ++depth) { // Start searching up to depth 1 since searching up to depth 0 does nothing
-		// Check for timeout
-		if (std::clock() > upperTimeLimit) {
-			std::cout << "Out of time searching depth " << depth-- << std::endl;
-			break;
-		}
 		// Get minimax chosen move
 		int depthTracker = 0; // Used to check if we are out of states to check (compare with oldTracker)
 		move = Game::MinimaxSearch(state, INT_MIN, INT_MAX, 0, depth, currentId, enemyId, upperTimeLimit, &depthTracker);
+
 		// Check if we have reached the end of the tree
 		if (depthTracker == oldTracker) {
 			break;
 		} else {
 			oldTracker = depthTracker;
 		}
+
+		// Check for timeout
+		if (std::clock() > upperTimeLimit) {
+			std::cout << "Out of time searching depth " << depth << std::endl;
+			move = oldMove; // Use the previous iteration's move, since the current iteration never finished and is likely incomplete
+			break;
+		} else {
+			oldMove = move; // Set the oldMove if the iteration didn't timeout
+		}
 	}
 
-	std::cout << "Completed search of depth " << depth << std::endl;
+	std::cout << "Completed search of depth " << depth - 1 << std::endl;
+	std::cout << "Took a total of " << (double)(upperTimeLimit - startTime) / 1000 << " seconds" << std::endl;
 
 	return move.move;
 }
