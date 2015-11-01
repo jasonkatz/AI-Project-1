@@ -67,8 +67,8 @@ void Game::PrintBoard() {
 	static char player2Tile[] = "\033[30;47;7m  ";
 	static char blankTile[] = "\033[40;32;2;7m ";
 	static char noColor[] = "\033[0m";
-	static char rowDivider[] = "   \033[40;32;2;7m|____|____|____|____|____|____|____|____|";
-	static char blankRow[] = "   \033[40;32;2;7m|    |    |    |    |    |    |    |    |";
+	static char rowDivider[] = "   \033[40;32;2;7m|____||____||____||____||____||____||____||____|";
+	static char blankRow[] = "   \033[40;32;2;7m|    ||    ||    ||    ||    ||    ||    ||    |";
 
 	cout << endl << "Current board: " << endl << endl;
 	cout << blankTile << "              " << endl;
@@ -76,7 +76,7 @@ void Game::PrintBoard() {
 	cout << "Player 2 is " << player2Tile << blankTile << endl;
 	cout << "               " << noColor << endl << endl;
 
-	cout << "      0    1    2    3    4    5    6    7" << endl;
+	cout << "      0     1     2     3     4     5     6     7" << endl;
 	for (int i = 0; i < 8; ++i) {
 		cout << rowDivider << noColor << endl;
 		cout << blankRow << noColor << endl;
@@ -92,9 +92,9 @@ void Game::PrintBoard() {
 			} else {
 				cout << "??";
 			}
-			cout << tileColor << " ";
+			cout << tileColor << " |";
 		}
-		cout << "|" << noColor << endl;
+		cout << noColor << endl;
 		cout << rowDivider << noColor << endl;
 	}
 	cout << endl;
