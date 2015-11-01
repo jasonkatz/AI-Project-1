@@ -49,7 +49,7 @@ Game::Game(Player * p1, Player * p2, int limit, GameState state, int currentId) 
 			}
 		}
 	}
-	
+
 	currentState = GameState(newBoard);
 
 	if (currentId == 1) {
@@ -62,54 +62,42 @@ Game::Game(Player * p1, Player * p2, int limit, GameState state, int currentId) 
 }
 
 void Game::PrintBoard() {
-	// Initialize color and symbol arrays
-	char normal[] = { 0x1b, '[', '0', ';', '3', '9', 'm', 0 };
-	char blue[] = { 0x1b, '[', '1', ';', '3', '4', 'm', 0 };
-	char pink[] = { 0x1b, '[', '1', ';', '3', '2', 'm', 0 };
-    vector<char *> colors;
-    colors.push_back(&normal[0]);
-    colors.push_back(&blue[0]);
-    colors.push_back(&pink[0]);
-	char symbols[3] = { ' ', '*', '-' };
+	static char tileColor[] = "\033[40;32;2;7m";
+	static char player1Tile[] = "\033[37;40;7m  ";
+	static char player2Tile[] = "\033[30;47;7m  ";
+	static char blankTile[] = "\033[40;32;2;7m ";
+	static char noColor[] = "\033[0m";
+	static char rowDivider[] = "   \033[40;32;2;7m|____|____|____|____|____|____|____|____|";
+	static char blankRow[] = "   \033[40;32;2;7m|    |    |    |    |    |    |    |    |";
 
-	// Print the board
-	cout << endl << "Current board:" << endl << endl;
-	cout << "Player 1 is " << colors[1] << symbols[1] << colors[0] << endl;
-	cout << "Player 2 is " << colors[2] << symbols[2] << colors[0] << endl << endl;
-	//cout << "Player 1 is " << symbols[1] << endl;
-	//cout << "Player 2 is " << symbols[2] << endl << endl;
-	cout << "     0   1   2   3   4   5   6   7  " << endl;
-	cout << "   ---------------------------------" << endl;
+	cout << endl << "Current board: " << endl << endl;
+	cout << blankTile << "              " << endl;
+	cout << "Player 1 is " << noColor << player1Tile << blankTile << endl;
+	cout << "Player 2 is " << player2Tile << blankTile << endl;
+	cout << "               " << noColor << endl << endl;
+
+	cout << "      0    1    2    3    4    5    6    7" << endl;
 	for (int i = 0; i < 8; ++i) {
-		cout << "   ";
+		cout << rowDivider << noColor << endl;
+		cout << blankRow << noColor << endl;
+		cout << " " << i << " ";
 		for (int j = 0; j < 8; ++j) {
-			cout << "|   ";
-		}
-		cout << "|" << endl << " " << i << " ";
-		for (int j = 0; j < 8; ++j) {
-			cout << "| ";
-			char symbol = symbols[0];
+			cout << tileColor << "| ";
 			if (currentState.board[i][j] == player1->GetId()) {
-				symbol = symbols[1];
+				cout << noColor << player1Tile;
 			} else if (currentState.board[i][j] == player2->GetId()) {
-				symbol = symbols[2];
+				cout << noColor << player2Tile;
+			} else if (currentState.board[i][j] == 0) {
+				cout << blankTile << blankTile;
+			} else {
+				cout << "??";
 			}
-			char * color = colors[0];
-			if (currentState.board[i][j] == player1->GetId()) {
-				color = colors[1];
-			} else if (currentState.board[i][j] == player2->GetId()) {
-				color = colors[2];
-			}
-			//cout << symbol << " ";
-			cout << color << symbol << colors[0] << " ";
+			cout << tileColor << " ";
 		}
-		cout << "|" << endl << "   ";
-		for (int j = 0; j < 8; ++j) {
-			cout << "|   ";
-		}
-		cout << "|" << endl;
-		cout << "   ---------------------------------" << endl;
+		cout << "|" << noColor << endl;
+		cout << rowDivider << noColor << endl;
 	}
+	cout << endl;
 }
 
 void Game::Move() {
@@ -357,7 +345,7 @@ void Game::PrintResults() {
 			}
 		}
 	}
-	
+
 	// Display results
 	cout << "Game over!" << endl;
 	cout << "Player " << (player1Count > player2Count ? "1" : "2") << " wins!" << endl;
@@ -553,7 +541,7 @@ vector<Location> Game::getAdjacentLocations(GameState state, Location l, int id)
 		if (state.board[l.row - 1][l.column] == id) {
 			adjacent.push_back(Location(l.row - 1, l.column, "UP"));
 		}
-		
+
 		if (l.column > 0) {
 			if (state.board[l.row - 1][l.column - 1] == id) {
 				adjacent.push_back(Location(l.row - 1, l.column - 1, "UPLEFT"));
