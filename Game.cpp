@@ -627,7 +627,7 @@ MoveVal Game::MinimaxSearch(GameState state, double min, double max, int depth, 
 				bestMove = move.move;
 			}
 			if (bestVal > max) {
-				return MoveVal(max, move.move);
+				return MoveVal(max, bestMove);
 			}
 		}
 		return MoveVal(bestVal, bestMove);
@@ -642,7 +642,7 @@ MoveVal Game::MinimaxSearch(GameState state, double min, double max, int depth, 
 				bestMove = move.move;
 			}
 			if (bestVal < min) {
-				return MoveVal(min, move.move);
+				return MoveVal(min, bestMove);
 			}
 		}
 		return MoveVal(bestVal, bestMove);

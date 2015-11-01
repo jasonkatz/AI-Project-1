@@ -65,6 +65,7 @@ Location ComputerPlayer::MakeMove(GameState state) {
 			break;
 		} else {
 			oldMove = move; // Set the oldMove if the iteration didn't timeout
+			//std::cout << "Depth " << depth << ": " << move.move << "\t" << move.value << std::endl;
 		}
 	}
 
