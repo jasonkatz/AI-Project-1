@@ -25,7 +25,7 @@ int main() {
 	/*
 	 * Get initial data
 	 */
-	
+
 	// Time limit
 	int timeLimit;
 	cout << "Specify a time limit (in seconds): ";
@@ -39,11 +39,12 @@ int main() {
 	// Player 1 type (use string var and check first character so we don't overflow into the next input
 	Player * p1;
 	string p1Type;
+	bool player1Human;
 	do {
 		cout << "Specify whether you want player 1 to be a (h)uman or a (c)omputer: ";
 		cin >> p1Type;
 	} while (p1Type[0] != 'h' && p1Type[0] != 'H' && p1Type[0] != 'c' && p1Type[0] != 'C');
-	if (p1Type[0] == 'h' || p1Type[0] == 'H') {
+	if ((player1Human = (p1Type[0] == 'h' || p1Type[0] == 'H'))) {
 		p1 = new HumanPlayer();
 	} else {
 		p1 = new ComputerPlayer();
@@ -52,11 +53,12 @@ int main() {
 	// Player 2 type (use string var and check first character so we don't overflow into the next input
 	Player * p2;
 	string p2Type;
+	bool player2Human;
 	do {
 		cout << "Specify whether you want player 2 to be a (h)uman or a (c)omputer: ";
 		cin >> p2Type;
 	} while (p2Type[0] != 'h' && p2Type[0] != 'H' && p2Type[0] != 'c' && p2Type[0] != 'C');
-	if (p2Type[0] == 'h' || p2Type[0] == 'H') {
+	if ((player2Human = (p2Type[0] == 'h' || p2Type[0] == 'H'))) {
 		p2 = new HumanPlayer();
 	} else {
 		p2 = new ComputerPlayer();
@@ -75,7 +77,7 @@ int main() {
 	if (fromFile[0] == 'y' || fromFile[0] == 'Y') {
 		cout << "Enter the name of the file you'd like to load from: ";
 		cin >> fileName;
-		game = Game::FromFile(fileName);
+		game = Game::FromFile(fileName, player1Human, player2Human);
 	}
 
 	/*

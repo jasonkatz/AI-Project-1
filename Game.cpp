@@ -499,7 +499,7 @@ std::vector<Location> Game::LegalMoves(GameState state, int id) {
 	return validLocations;
 }
 
-Game Game::FromFile(string fileName) {
+Game Game::FromFile(string fileName, bool player1Human, bool player2Human) {
 	std::ifstream file(fileName);
 
 	if (!file.is_open()) {
@@ -531,7 +531,16 @@ Game Game::FromFile(string fileName) {
 
 	file.close();
 
-	return Game(new ComputerPlayer(), new ComputerPlayer(), time, state, currentPlayerId);
+	Player * p1 = new ComputerPlayer();
+	Player * p2 = new ComputerPlayer();
+	if (player1Human) {
+		p1 = new HumanPlayer();
+	}
+	if (player2Human) {
+		p2 = new HumanPlayer();
+	}
+
+	return Game(p1, p2, time, state, currentPlayerId);
 }
 
 vector<Location> Game::getAdjacentLocations(GameState state, Location l, int id) {

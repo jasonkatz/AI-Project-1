@@ -66,8 +66,8 @@ public:
 	// Returns an array of legal moves given a current state and id of player making the move
 	static std::vector<Location> LegalMoves(GameState, int);
 
-	// Returns Game object loaded from file
-	static Game FromFile(std::string);
+	// Returns Game object loaded from file with flags to indicate player types
+	static Game FromFile(std::string, bool, bool);
 
 	// Searches the game tree for the best move
 	// and selects a move after provided time limit or entire tree searched
